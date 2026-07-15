@@ -1,0 +1,18 @@
+{
+  "name": "cloud-gaming-mirror",
+  "version": "1.0.0",
+  "description": "Ultra-low latency screen mirroring and control pipeline for iPad and Nintendo Switch",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "robotjs": "^0.6.0",
+    "screenshot-desktop": "^1.15.0",
+    "sharp": "^0.33.5",
+    "socket.io": "^4.8.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
