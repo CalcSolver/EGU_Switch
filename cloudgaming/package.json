@@ -1,18 +1,20 @@
 {
-  "name": "cloud-gaming-mirror",
+  "name": "egu-cloud-gaming-host",
   "version": "1.0.0",
-  "description": "Ultra-low latency screen mirroring and control pipeline for iPad and Nintendo Switch",
-  "main": "server.js",
+  "description": "EGU Local Cloud Gaming Host Console",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "electron ."
   },
   "dependencies": {
-    "express": "^4.21.2",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.2",
     "robotjs": "^0.6.0",
-    "screenshot-desktop": "^1.15.0",
-    "sharp": "^0.33.5",
-    "socket.io": "^4.8.1"
+    "sharp": "^0.33.5"
   },
-  "author": "",
-  "license": "ISC"
+  "devDependencies": {
+    "electron": "^30.0.0"
+  },
+  "author": "Harry",
+  "license": "MIT"
 }
