@@ -1,7 +1,7 @@
 {
   "name": "egu-cloud-gaming-host",
   "version": "1.0.0",
-  "description": "EGU Local Cloud Gaming Host Console",
+  "description": "EGU Host Console Manager",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -15,6 +15,6 @@
   "devDependencies": {
     "electron": "^30.0.0"
   },
-  "author": "Harry",
-  "license": "MIT"
+  "author": "EGU Team",
+  "license": "ISC"
 }
