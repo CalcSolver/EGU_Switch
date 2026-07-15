@@ -6,7 +6,8 @@
   # DEPENDENCIES
  - Nintendo Switch modded/ non-modded
  - laptop/ macbook or device with a terminal
- 
+ # Download:
+ https://github.com/CalcSolver/EGU_Switch/releases/
  
  
  # INTRUCTIONS FOR PC/LAPTOP
