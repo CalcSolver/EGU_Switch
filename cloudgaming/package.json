@@ -4,7 +4,13 @@
   "description": "EGU Host Console Manager",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "allowScripts": {
+    "electron": true,
+    "robotjs": true,
+    "sharp": true
   },
   "dependencies": {
     "express": "^4.19.2",
@@ -13,7 +19,21 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "electron": "^30.0.0"
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.egu.cloudgaming",
+    "productName": "EGU Cloud Host",
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "directories": {
+      "output": "dist"
+    }
   },
   "author": "EGU Team",
   "license": "ISC"
