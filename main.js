@@ -3,29 +3,32 @@ const path = require('path');
 const { execSync } = require('child_process');
 const fs = require('fs');
 
-// --- AUTO-SETUP BINARY CHECK ---
-function verifyNativeBinaries() {
+// --- INTEGRATED DEPENDENCY RESOLVER ---
+function autoRebuildNativeModules() {
     const robotjsBinary = path.join(__dirname, 'node_modules', 'robotjs', 'build', 'Release', 'robotjs.node');
+    
     if (!fs.existsSync(robotjsBinary)) {
-        console.log("⚠️ Missing native dependencies! Running automated rebuild...");
+        console.log("⚙️ Native binary missing. Preparing offline compiler installation...");
         try {
-            // Instantly unblocks scripts and compiles them directly inside node_modules
+            // Unblock scripts so robotjs & sharp can build
             execSync('npm install-scripts approve robotjs', { stdio: 'inherit' });
             execSync('npm install-scripts approve sharp', { stdio: 'inherit' });
+            
+            console.log("🔨 Compiling robotjs directly onto local computer environment...");
             execSync('npm rebuild robotjs --build-from-source', { stdio: 'inherit' });
-            console.log("✅ Rebuild complete!");
+            console.log("🎉 robotjs compiled successfully!");
         } catch (error) {
-            console.error("❌ Auto-rebuild failed. Make sure you have build tools installed:", error);
+            console.error("❌ Critical compilation error. Ensure C++ compilers are installed.", error.message);
         }
+    } else {
+        console.log("✅ robotjs binaries found!");
     }
 }
 
-// Run the verification check before doing anything else
-verifyNativeBinaries();
+// Check native bindings prior to initializing server logic or GUI
+autoRebuildNativeModules();
 
-// Now safely load our server logic
 const serverLogic = require('./server.js');
-
 let mainWindow;
 
 function createWindow() {
@@ -35,30 +38,40 @@ function createWindow() {
         resizable: false,
         alwaysOnTop: true,
         autoHideMenuBar: true,
+        title: "EGU Host Manager",
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
         }
     });
 
-    // Load the control panel UI
     mainWindow.loadFile('control.html');
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
 }
 
 app.whenReady().then(createWindow);
 
-// Handle toggle commands from the UI
+// Event Listeners interacting with control.html toggles
 ipcMain.on('toggle-server', (event, targetState) => {
     if (targetState === 'on') {
-        serverLogic.startServer();
-        event.reply('server-status', { running: true, link: 'http://localhost:3000' });
+        try {
+            serverLogic.startServer();
+            event.reply('server-status', { running: true, error: null });
+        } catch (err) {
+            event.reply('server-status', { running: false, error: err.message });
+        }
     } else {
         serverLogic.stopServer();
-        event.reply('server-status', { running: false });
+        event.reply('server-status', { running: false, error: null });
     }
 });
 
 app.on('window-all-closed', () => {
     serverLogic.stopServer();
-    app.quit();
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
