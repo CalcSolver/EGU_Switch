@@ -1,61 +1,57 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { execSync } = require('child_process');
+const { exec } = require('child_process');
 const fs = require('fs');
 
-// --- INTEGRATED DEPENDENCY RESOLVER ---
-function autoRebuildNativeModules() {
-    const robotjsBinary = path.join(__dirname, 'node_modules', 'robotjs', 'build', 'Release', 'robotjs.node');
-    
-    if (!fs.existsSync(robotjsBinary)) {
-        console.log("⚙️ Native binary missing. Preparing offline compiler installation...");
-        try {
-            // Unblock scripts so robotjs & sharp can build
-            execSync('npm install-scripts approve robotjs', { stdio: 'inherit' });
-            execSync('npm install-scripts approve sharp', { stdio: 'inherit' });
-            
-            console.log("🔨 Compiling robotjs directly onto local computer environment...");
-            execSync('npm rebuild robotjs --build-from-source', { stdio: 'inherit' });
-            console.log("🎉 robotjs compiled successfully!");
-        } catch (error) {
-            console.error("❌ Critical compilation error. Ensure C++ compilers are installed.", error.message);
-        }
-    } else {
-        console.log("✅ robotjs binaries found!");
-    }
-}
-
-// Check native bindings prior to initializing server logic or GUI
-autoRebuildNativeModules();
-
-const serverLogic = require('./server.js');
 let mainWindow;
+let serverLogic;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 380,
-        height: 250,
+        width: 400,
+        height: 480,
         resizable: false,
-        alwaysOnTop: true,
         autoHideMenuBar: true,
-        title: "EGU Host Manager",
+        title: "EGU Controller Console",
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
         }
     });
 
-    mainWindow.loadFile('control.html');
-
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
+    mainWindow.loadFile('index.html');
 }
 
-app.whenReady().then(createWindow);
+// Handle the explicit compilation routine safely when user clicks the button
+ipcMain.on('run-setup', (event) => {
+    console.log("Starting script installation phase...");
+    
+    // Command sequence to authorize permissions and force native module structural builds
+    const command = 'npm install-scripts approve robotjs && npm install-scripts approve sharp && npm rebuild robotjs --build-from-source';
+    
+    exec(command, { cwd: __dirname }, (error, stdout, stderr) => {
+        if (error) {
+            console.error(error);
+            event.reply('setup-finished', { success: false, error: error.message });
+            return;
+        }
+        
+        // Dynamically import server logic once building operations complete safely
+        try {
+            serverLogic = require('./server.js');
+            event.reply('setup-finished', { success: true });
+        } catch (loadErr) {
+            event.reply('setup-finished', { success: false, error: loadErr.message });
+        }
+    });
+});
 
-// Event Listeners interacting with control.html toggles
 ipcMain.on('toggle-server', (event, targetState) => {
+    if (!serverLogic) {
+        event.reply('server-status', { running: false, error: "Setup must be run successfully first." });
+        return;
+    }
+
     if (targetState === 'on') {
         try {
             serverLogic.startServer();
@@ -69,9 +65,9 @@ ipcMain.on('toggle-server', (event, targetState) => {
     }
 });
 
+app.whenReady().then(createWindow);
+
 app.on('window-all-closed', () => {
-    serverLogic.stopServer();
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    if (serverLogic) serverLogic.stopServer();
+    if (process.platform !== 'darwin') app.quit();
 });
