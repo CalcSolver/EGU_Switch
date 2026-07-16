@@ -1,4 +1,3 @@
-<img width="4032" height="3024" alt="IMG_0881" src="https://github.com/user-attachments/assets/79ed0ac9-4337-460e-93dd-de51fe3be234" />
 ## **DISCLAIMER**:
 -*If someone gets your tailscale link, they can control your computer*\
 -You can turn it off by using the control.html
@@ -10,7 +9,7 @@
  # Download:
  https://github.com/CalcSolver/EGU_Switch/releases/
  
- 
+ <img width="4032" height="3024" alt="IMG_0881" src="https://github.com/user-attachments/assets/79ed0ac9-4337-460e-93dd-de51fe3be234" />
  # INTRUCTIONS FOR PC/LAPTOP
 1. Download the lastest update of the folder
 2. Open Windows Command Prompt or Apple's Terminal
